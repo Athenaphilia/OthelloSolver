@@ -44,7 +44,7 @@ int main() {
         char move_input[3];
         scanf("%s", move_input);
 
-        // Convert the input to board coordinates (e.g., 'c3' to index 34)
+        // Convert the input to board coordinates (e.g., '33' to index 34)
         int x = move_input[0] - '1';
         int y = move_input[1] - '1';
         int move_index = x + y * BOARD_SIZE;
