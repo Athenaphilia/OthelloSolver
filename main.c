@@ -1,4 +1,5 @@
 #include "position.h"
+#include "solver.h"
 #include "utils.h"
 #include <stdio.h>
 
