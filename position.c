@@ -95,7 +95,6 @@ void generate_legal_moves(Bitboard board, int player, uint64_t legal_moves[34]) 
 
         // Check if the square is empty
         if (!(player_pieces & square_mask) && !(opponent_pieces & square_mask)) {
-            int valid = 0;
 
             // Check in all eight directions for potential flips
             for (int dy = -1; dy < 2; dy++) {
@@ -119,72 +118,15 @@ void generate_legal_moves(Bitboard board, int player, uint64_t legal_moves[34]) 
 }
 
 // Function to generate legal moves for a given player
-uint64_t generate_int_moves(Bitboard board, int player) {
-    uint64_t legal_moves = 0ULL;
-
-    uint64_t player_pieces = (player == 1) ? board.black : board.white;
-    uint64_t opponent_pieces = (player == 1) ? board.white : board.black;
-
-    // Iterate over all squares
-    for (int i = 0; i < NUM_SQUARES; i++) {
-        uint64_t square_mask = 1ULL << i;
-
-        // Check if the square is empty
-        if (!(player_pieces & square_mask) && !(opponent_pieces & square_mask)) {
-            // Check in all eight directions for potential flips
-            for (int dy = -1; dy < 2; dy++) {
-                for (int dx = -1; dx < 2; dx++) {
-                    if (dx == 0 && dy == 0) {
-                        continue;
-                    }
-                    int x = i % BOARD_SIZE;
-                    int y = i / BOARD_SIZE;
-
-                    uint64_t flips = 0ULL;
-                    int valid = 0;
-
-                    // Move along the current direction
-                    x += dx;
-                    y += dy;
-                    int index = x + y * BOARD_SIZE;
-
-                    if (x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE) {
-                        uint64_t square = 1ULL << index;
-
-                        if (opponent_pieces & square) {
-                            flips |= square;
-                            x += dx;
-                            y += dy;
-                            index = x + y * BOARD_SIZE;
-
-                            // Continue checking for flips
-                            while (x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE) {
-                                square = 1ULL << index;
-
-                                if (player_pieces & square) {
-                                    valid = 1;
-                                    break;
-                                } else if (opponent_pieces & square) {
-                                    flips |= square;
-                                } else {
-                                    break;
-                                }
-
-                                x += dx;
-                                y += dy;
-                                index = x + y * BOARD_SIZE;
-                            }
-                        }
-                    }
-
-                    if (valid && flips)
-                        legal_moves |= (1ULL << i);
-                }
-            }
+uint64_t generate_int_moves(uint64_t legal_moves[34]) {
+    uint64_t move = 0ULL;
+    for (int i = 0; i < 34; i++) {
+        if (legal_moves[i] == 0ULL) {
+            break;
         }
+        move |= legal_moves[i];
     }
-
-    return legal_moves;
+    return move;
 }
 
 uint64_t calculate_flips_direction(uint64_t player_pieces, uint64_t opponent_pieces, uint64_t move, int row_offset, int col_offset) {
@@ -284,8 +226,9 @@ int main() {
         // Display the current board
         display_board(board);
 
-        uint64_t legal_moves = generate_int_moves(board, player);
-
+        uint64_t legal_moves_array[34];
+        generate_legal_moves(board, player, legal_moves_array);
+        uint64_t legal_moves = generate_int_moves(legal_moves_array);
         // Check for game over or no legal moves
         if (legal_moves == 0ULL) {
             // Implement endgame logic here
