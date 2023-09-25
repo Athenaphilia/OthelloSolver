@@ -164,7 +164,7 @@ Bitboard make_move(Bitboard board, int player, uint64_t move) {
     return board;
 }
 
-void display_board(Bitboard board) {
+void display_board(Bitboard board, uint64_t legal_moves) {
     printf("  1 2 3 4 5 6 7 8\n");
     for (int y = 0; y < BOARD_SIZE; y++) {
         printf("%d ", y + 1);
@@ -176,6 +176,8 @@ void display_board(Bitboard board) {
                 printf("B ");
             } else if (board.white & square_mask) {
                 printf("W ");
+            } else if (legal_moves & square_mask) {
+                printf("L ");
             } else {
                 printf(". ");
             }

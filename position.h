@@ -3,7 +3,7 @@
 #define NUM_SQUARES (BOARD_SIZE * BOARD_SIZE)
 
 // Define bitboard structures for black and white pieces
-typedef struct {
+typedef struct Bitboard {
     uint64_t black;
     uint64_t white;
 } Bitboard;
@@ -27,7 +27,7 @@ uint64_t calculate_flips_direction(uint64_t player_pieces, uint64_t opponent_pie
 Bitboard make_move(Bitboard board, int player, uint64_t move);
 
 // Function to display the current board state
-void display_board(Bitboard board);
+void display_board(Bitboard board, uint64_t legal_moves);
 
 // Function to count the number of pieces for a player
 int count_pieces(Bitboard board, int player);

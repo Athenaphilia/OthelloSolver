@@ -8,12 +8,14 @@ int main() {
 
     // Main game loop
     while (1) {
-        // Display the current board
-        display_board(board);
 
+        // find the legal moves
         uint64_t legal_moves_array[34];
         generate_legal_moves(board, player, legal_moves_array);
         uint64_t legal_moves = generate_int_moves(legal_moves_array);
+
+        // Display the current board
+        display_board(board, legal_moves);
         // Check for game over or no legal moves
         if (legal_moves == 0ULL) {
             // Implement endgame logic here
@@ -54,7 +56,7 @@ int main() {
     }
 
     // Display the final board and determine the winner
-    display_board(board);
+    display_board(board, 0ULL);
 
     return 0;
 }
