@@ -17,8 +17,10 @@ int main() {
         // Display the current board
         display_board(board, legal_moves);
         // Check for game over or no legal moves
-        if (legal_moves == 0ULL) {
-            // Implement endgame logic here
+        int state = find_state(board, player);
+        if (state == 1) {
+
+            // game over
             int black_count = count_pieces(board, 1);
             int white_count = count_pieces(board, 2);
 
@@ -30,6 +32,11 @@ int main() {
                 printf("It's a draw! %d-%d\n", black_count, white_count);
             }
             break;
+        } else if (state == 2) {
+            // pass
+            printf("Player %c passes\n", player);
+            player = (player == 1) ? 2 : 1;
+            continue;
         }
 
         printf("Player %c's turn (Enter your move in the format 'xy', e.g., 'c3'): ", (player == 1) ? 'B' : 'W');
@@ -55,7 +62,7 @@ int main() {
         }
     }
 
-    // Display the final board and determine the winner
+    // Display the final board
     display_board(board, 0ULL);
 
     return 0;

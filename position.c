@@ -156,12 +156,33 @@ Bitboard make_move(Bitboard board, int player, uint64_t move) {
         }
     }
 
+    // apply the flips
     player_pieces |= flips;
     opponent_pieces &= ~flips;
     board.black = (player == 1) ? player_pieces : opponent_pieces;
     board.white = (player == 1) ? opponent_pieces : player_pieces;
 
     return board;
+}
+
+int find_state(Bitboard board, int player) {
+
+    // check if the board is full
+    if (~(board.black | board.white) == 0ULL) {
+        return 1; // game over
+    }
+    uint64_t legal_moves_player[34];
+
+    generate_legal_moves(board, player, legal_moves_player);
+    if (generate_int_moves(legal_moves_player) == 0ULL) {
+        uint64_t legal_moves_opponent[34];
+        generate_legal_moves(board, (player == 1) ? 2 : 1, legal_moves_opponent);
+        if (generate_int_moves(legal_moves_opponent) == 0ULL) {
+            return 1; // double pass, game over
+        }
+        return 2; // pass
+    }
+    return 0; // continue
 }
 
 void display_board(Bitboard board, uint64_t legal_moves) {
