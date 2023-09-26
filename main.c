@@ -4,26 +4,26 @@
 #include <stdio.h>
 
 int main() {
-    Bitboard board = initialize_board();
-    int player = 1; // Assume black starts
+    Game game = initialize_board();
+    game.player = 1; // Assume black starts
 
     // Main game loop
     while (1) {
 
         // find the legal moves
         uint64_t legal_moves_array[34];
-        generate_legal_moves(board, player, legal_moves_array);
+        generate_legal_moves(game, legal_moves_array);
         uint64_t legal_moves = generate_int_moves(legal_moves_array);
 
         // Display the current board
-        display_board(board, legal_moves);
+        display_board(game, legal_moves);
         // Check for game over or no legal moves
-        int state = find_state(board, player);
+        int state = find_state(game);
         if (state == 1) {
 
             // game over
-            int black_count = count_pieces(board, 1);
-            int white_count = count_pieces(board, 2);
+            int black_count = count_pieces(game, 1);
+            int white_count = count_pieces(game, 2);
 
             if (black_count > white_count) {
                 printf("Player B wins with %d-%d!\n", black_count, white_count);
@@ -35,12 +35,12 @@ int main() {
             break;
         } else if (state == 2) {
             // pass
-            printf("Player %c passes\n", player);
-            player = (player == 1) ? 2 : 1;
+            printf("Player %c passes\n", (game.player == 1) ? 'B' : 'W');
+            game.player = (game.player == 1) ? 2 : 1;
             continue;
         }
 
-        printf("Player %c's turn (Enter your move in the format 'xy', e.g., 'c3'): ", (player == 1) ? 'B' : 'W');
+        printf("Player %c's turn (Enter your move in the format 'xy', e.g., 'c3'): ", (game.player == 1) ? 'B' : 'W');
 
         char move_input[3];
         scanf("%s", move_input);
@@ -54,17 +54,14 @@ int main() {
         // Check if the chosen move is legal
         if (legal_moves & chosen_move) {
             // Make the move and update the board
-            board = make_move(board, player, chosen_move);
+            game = make_move(game, chosen_move);
 
             // Switch to the other player
-            player = 3 - player; // Toggle between player 1 and 2
+            game.player = 3 - game.player; // Toggle between player 1 and 2
         } else {
             printf("Invalid move. Please try again.\n");
         }
     }
-
-    // Display the final board
-    display_board(board, 0ULL);
 
     return 0;
 }

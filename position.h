@@ -3,36 +3,35 @@
 #define NUM_SQUARES (BOARD_SIZE * BOARD_SIZE)
 
 // Define bitboard structures for black and white pieces
-typedef struct Bitboard {
-    uint64_t black;
-    uint64_t white;
-} Bitboard;
+typedef struct Game {
+    uint64_t black; // bitboard of black pieces
+    uint64_t white; // bitboard of white pieces
+    int player;     // current player
+} Game;
 
 /**
  * @return a board of the starting
  */
-Bitboard initialize_board();
+Game initialize_board();
 
 /**
  * Checks a specified direction for flips
  * Helper function for generate_legal_moves()
- * @param board current board
- * @param player current player
+ * @param game current board
  * @param square the move to check
  * @param dx column offset
  * @param dy row offset
  * @return a mask of the flipped pieces or 0 for no flips
  */
-uint64_t check_direction(Bitboard board, int player, int square, int dx, int dy);
+uint64_t check_direction(Game game, int square, int dx, int dy);
 
 /**
  * Fills an array with all the legal moves in a position
  * Extra space is filled with 0's
- * @param board current board
- * @param player current player
+ * @param game current board
  * @param legal_moves array to fill with legal moves
  */
-void generate_legal_moves(Bitboard board, int player, uint64_t legal_moves[34]);
+void generate_legal_moves(Game game, uint64_t legal_moves[34]);
 
 /**
  * Gets one bitmask for legal moves from an array of moves
@@ -55,32 +54,29 @@ uint64_t calculate_flips_direction(uint64_t player_pieces, uint64_t opponent_pie
 
 /**
  * Makes a move and flips the required pieces
- * @param board current board
- * @param player current player
+ * @param game current board
  * @param move move to play (MUST BE LEGAL)
  * @return updated board
  */
-Bitboard make_move(Bitboard board, int player, uint64_t move);
+Game make_move(Game game, uint64_t move);
 
 /**
  * Checks a board for it's state
- * @param board current board
- * @param player current player
+ * @param game current board
  * @return 0: continue 1: stop playing 2: current player passes
  */
-int find_state(Bitboard board, int player);
+int find_state(Game game);
 
 /**
  * Displays the current board with legal moves shown
- * @param board current board
+ * @param game current board
  * @param legal_moves legal moves bitmask
  */
-void display_board(Bitboard board, uint64_t legal_moves);
+void display_board(Game game, uint64_t legal_moves);
 
 /**
  * Counts the pieces of a player
- * @param board current board
- * @param player player to count
+ * @param game current board
  * @return the number of pieces belonging to a player
  */
-int count_pieces(Bitboard board, int player);
+int count_pieces(Game game, int player);
