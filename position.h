@@ -1,6 +1,7 @@
 #include <stdint.h>
 #define BOARD_SIZE 8
 #define NUM_SQUARES (BOARD_SIZE * BOARD_SIZE)
+#define MAX_LEGAL_MOVES 34
 
 // Define bitboard structures for black and white pieces
 typedef struct Game {

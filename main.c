@@ -40,7 +40,7 @@ int main() {
             continue;
         }
 
-        printf("Player %c's turn (Enter your move in the format 'xy', e.g., 'c3'): ", (game.player == 1) ? 'B' : 'W');
+        printf("Player %c's turn (Enter your move in the format 'xy', e.g., '33'): ", (game.player == 1) ? 'B' : 'W');
 
         char move_input[3];
         scanf("%s", move_input);

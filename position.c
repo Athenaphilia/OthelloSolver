@@ -54,14 +54,14 @@ uint64_t check_direction(Game game, int square, int dx, int dy) {
     return 0ULL;
 }
 
-void generate_legal_moves(Game game, uint64_t legal_moves[34]) {
+void generate_legal_moves(Game game, uint64_t legal_moves[MAX_LEGAL_MOVES]) {
     int num_moves = 0;
 
     uint64_t player_pieces = (game.player == 1) ? game.black : game.white;
     uint64_t opponent_pieces = (game.player == 1) ? game.white : game.black;
 
     // Initialize the legal_moves array with zeros
-    for (int i = 0; i < 34; i++) {
+    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
         legal_moves[i] = 0ULL;
     }
 
@@ -82,7 +82,7 @@ void generate_legal_moves(Game game, uint64_t legal_moves[34]) {
                     uint64_t flips = check_direction(game, i, dx, dy);
 
                     if (flips) {
-                        if (num_moves < 34) {
+                        if (num_moves < MAX_LEGAL_MOVES) {
                             legal_moves[num_moves] = square_mask;
                             num_moves++;
                         }
@@ -93,9 +93,9 @@ void generate_legal_moves(Game game, uint64_t legal_moves[34]) {
     }
 }
 
-uint64_t generate_int_moves(uint64_t legal_moves[34]) {
+uint64_t generate_int_moves(uint64_t legal_moves[MAX_LEGAL_MOVES]) {
     uint64_t move = 0ULL;
-    for (int i = 0; i < 34; i++) {
+    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
         if (legal_moves[i] == 0ULL) {
             break;
         }
@@ -171,11 +171,11 @@ int find_state(Game game) {
     if (~(game.black | game.white) == 0ULL) {
         return 1; // game over
     }
-    uint64_t legal_moves_player[34];
+    uint64_t legal_moves_player[MAX_LEGAL_MOVES];
 
     generate_legal_moves(game, legal_moves_player);
     if (generate_int_moves(legal_moves_player) == 0ULL) {
-        uint64_t legal_moves_opponent[34];
+        uint64_t legal_moves_opponent[MAX_LEGAL_MOVES];
         generate_legal_moves(game, legal_moves_opponent);
         if (generate_int_moves(legal_moves_opponent) == 0ULL) {
             return 1; // double pass, game over
