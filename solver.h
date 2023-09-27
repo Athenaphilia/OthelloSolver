@@ -14,6 +14,21 @@ typedef struct Node {
 } Node;
 
 /**
+ * Finds if the node is a leaf
+ * @param node node to check
+ * @return if node is leaf
+ */
+bool is_leaf(Node *node);
+
+/**
+ * Finds the Upper Confidence Bound of a node
+ * Uses a constant of 1.5
+ * @param node node to find ucb1 for
+ * @return ucb1 score
+ */
+double UCB1(Node *node);
+
+/**
  * Shuffles the array given
  * Used to pick random moves in an easier manner
  * Randomizes move order while stopping duplicates
@@ -23,12 +38,27 @@ typedef struct Node {
 void shuffle_moves(uint64_t *legal_moves, int num_legal);
 
 /**
- * Unimplemented function
+ * Gets a random move in a range
+ * @param num_legal the number of legal moves
+ * @return a random index in for the legal moves
+ */
+int random_move(int num_legal);
+
+/**
  * Selects best scoring child based on function
+ * Currently using ucb1
  * @param node node to search
  * @return best child
  */
 Node *select_child(Node *node);
+
+/**
+ * Selects the best node in a tree based on function
+ * Currently using ucb1 with greedy algorithm
+ * @param root root of tree to search
+ * @return the best node in the tree
+ */
+Node *select_best_node(Node *root);
 
 /**
  * Gets the mcts score from a terminal game state
@@ -53,6 +83,15 @@ void backpropogate(Node *node, double result);
  * @return 0 if child has legal moves, 1 if terminal state
  */
 int expand_node(Node *node, int optimizer);
+
+/**
+ * Simulates a game down to a terminal state using a function
+ * Currently uses random selection
+ * @param game game to simulate
+ * @param optimizer which player mcts is optimizing for
+ * @return the score of the terminal game state
+ */
+double simulate(Game game, int optimizer);
 
 /**
  * Frees a tree recursively

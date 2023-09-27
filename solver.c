@@ -4,6 +4,14 @@
 #include <stdlib.h>
 #include <time.h>
 
+bool is_leaf(Node *node) {
+    return (node->children == NULL) ? true : false;
+}
+
+double UCB1(Node *node) {
+    return (node->value / node->visits) + 1.5 * (sqrt(log(node->parent->visits) / node->visits));
+}
+
 void shuffle_moves(uint64_t *legal_moves, int num_legal) {
 
     for (int i = 0; i < num_legal - 1; i++) {
@@ -14,8 +22,35 @@ void shuffle_moves(uint64_t *legal_moves, int num_legal) {
     }
 }
 
+int random_move(int num_legal) {
+    return rand() % num_legal;
+}
+
 Node *select_child(Node *node) {
-    return NULL;
+
+    Node *best_child = NULL;
+    double best_ucb1 = -INFINITY;
+    // iterate through the children and
+    for (int i = 0; i < node->num_legal; i++) {
+        if (node->children[i] == NULL) {
+            // reached the end, break
+            break;
+        }
+        Node *child = node->children[i];
+        double ucb1 = UCB1(child);
+        if (ucb1 > best_ucb1) {
+            best_ucb1 = ucb1;
+            best_child = child;
+        }
+    }
+    return best_child;
+}
+
+Node *select_best_node(Node *root) {
+    while (!is_leaf(root)) {
+        root = select_child(root);
+    }
+    return root;
 }
 
 double get_score_from_state(Game game, int optimizer) {
@@ -87,6 +122,22 @@ int expand_node(Node *node, int optimizer) {
 
     // child has more moves to make
     return 0;
+}
+
+double simulate(Game game, int optimizer) {
+    int state = find_state(game);
+    while (state != 1) {
+        uint64_t legal_moves[MAX_LEGAL_MOVES];
+        int num_legal = generate_legal_moves(game, legal_moves);
+        int move = random_move(num_legal);
+        game = make_move(game, legal_moves[move]);
+        state = find_state(game);
+        if (state == 2) {
+            // player passes
+            game.player = 3 - game.player;
+        }
+    }
+    return get_score_from_state(game, optimizer);
 }
 
 void free_tree(Node *root) {
