@@ -7,6 +7,7 @@ Game initialize_board() {
     Game game;
     game.black = 0x0000000810000000ULL; // Initial black pieces
     game.white = 0x0000001008000000ULL; // Initial white pieces
+    game.player = 1;
     return game;
 }
 
@@ -54,7 +55,7 @@ uint64_t check_direction(Game game, int square, int dx, int dy) {
     return 0ULL;
 }
 
-void generate_legal_moves(Game game, uint64_t legal_moves[MAX_LEGAL_MOVES]) {
+int generate_legal_moves(Game game, uint64_t *legal_moves) {
     int num_moves = 0;
 
     uint64_t player_pieces = (game.player == 1) ? game.black : game.white;
@@ -91,9 +92,10 @@ void generate_legal_moves(Game game, uint64_t legal_moves[MAX_LEGAL_MOVES]) {
             }
         }
     }
+    return num_moves;
 }
 
-uint64_t generate_int_moves(uint64_t legal_moves[MAX_LEGAL_MOVES]) {
+uint64_t generate_int_moves(uint64_t *legal_moves) {
     uint64_t move = 0ULL;
     for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
         if (legal_moves[i] == 0ULL) {
@@ -161,6 +163,7 @@ Game make_move(Game game, uint64_t move) {
     opponent_pieces &= ~flips;
     game.black = (game.player == 1) ? player_pieces : opponent_pieces;
     game.white = (game.player == 1) ? opponent_pieces : player_pieces;
+    game.player = 3 - game.player;
 
     return game;
 }

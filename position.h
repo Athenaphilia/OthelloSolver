@@ -31,15 +31,16 @@ uint64_t check_direction(Game game, int square, int dx, int dy);
  * Extra space is filled with 0's
  * @param game current board
  * @param legal_moves array to fill with legal moves
+ * @return number of legal moves found
  */
-void generate_legal_moves(Game game, uint64_t legal_moves[34]);
+int generate_legal_moves(Game game, uint64_t *legal_moves);
 
 /**
  * Gets one bitmask for legal moves from an array of moves
  * @param legal_moves an array of legal moves with uninitialized elements set to 0
  * @return a bitmask with all legal moves
  */
-uint64_t generate_int_moves(uint64_t legal_moves[34]);
+uint64_t generate_int_moves(uint64_t *legal_moves);
 
 /**
  * Calculates the flips needed in a certain direction
@@ -55,6 +56,8 @@ uint64_t calculate_flips_direction(uint64_t player_pieces, uint64_t opponent_pie
 
 /**
  * Makes a move and flips the required pieces
+ * Updates the player, but does not check for state
+ * User should check if the next player passes and update accordingly
  * @param game current board
  * @param move move to play (MUST BE LEGAL)
  * @return updated board
