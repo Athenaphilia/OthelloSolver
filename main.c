@@ -5,7 +5,6 @@
 
 int main() {
     Game game = initialize_board();
-    game.player = 1; // Assume black starts
 
     // Main game loop
     while (1) {
@@ -55,9 +54,6 @@ int main() {
         if (legal_moves & chosen_move) {
             // Make the move and update the board
             game = make_move(game, chosen_move);
-
-            // Switch to the other player
-            game.player = 3 - game.player; // Toggle between player 1 and 2
         } else {
             printf("Invalid move. Please try again.\n");
         }
