@@ -10,7 +10,7 @@ typedef struct Node {
     int num_legal;          // number of legal moves
     uint64_t visits;
     double value;
-    bool end;
+    bool end; // this is a redundant variable (maybe provides speed up?), refactor later to remove
 } Node;
 
 /**
@@ -80,9 +80,9 @@ void backpropogate(Node *node, double result);
  * Goes in order of legal_moves
  * @param node node to expand
  * @param optimizer for scoring if expansion ends in terminal state
- * @return 0 if child has legal moves, 1 if terminal state
+ * @return the expanded node
  */
-int expand_node(Node *node, int optimizer);
+Node *expand_node(Node *node);
 
 /**
  * Simulates a game down to a terminal state using a function
@@ -99,3 +99,12 @@ double simulate(Game game, int optimizer);
  * @param root root of tree to free
  */
 void free_tree(Node *root);
+
+/**
+ * Finds the best move according to mcts
+ * @param root tree to search
+ * @param optimizer player to find best move for
+ * @param budget how many iterations can be taken
+ * @return best move for optimizer
+ */
+uint64_t monte_carlo_tree_search(Node *root, int optimizer, int budget);
