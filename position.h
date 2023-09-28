@@ -1,3 +1,5 @@
+#ifndef POSITION_H
+#define POSITION_H
 #include <stdint.h>
 #define BOARD_SIZE 8
 #define NUM_SQUARES (BOARD_SIZE * BOARD_SIZE)
@@ -84,3 +86,5 @@ void display_board(Game game, uint64_t legal_moves);
  * @return the number of pieces belonging to a player
  */
 int count_pieces(Game game, int player);
+
+#endif

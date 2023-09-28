@@ -8,15 +8,16 @@ typedef struct Node {
     struct Node **children; // pointers to all the child nodes
     uint64_t *legal_moves;  // legal moves respective to children
     int num_legal;          // number of legal moves
+    int num_expanded;       // number of nodes that have been expanded
     uint64_t visits;
     double value;
-    bool end; // this is a redundant variable (maybe provides speed up?), refactor later to remove
+    bool end;
 } Node;
 
 /**
  * Finds if the node is a leaf
  * @param node node to check
- * @return if node is leaf
+ * @return if node still has expansions
  */
 bool is_leaf(Node *node);
 
@@ -24,9 +25,10 @@ bool is_leaf(Node *node);
  * Finds the Upper Confidence Bound of a node
  * Uses a constant of 1.5
  * @param node node to find ucb1 for
+ * @param UCB_C constant, higher for exploration, lower for exploitation
  * @return ucb1 score
  */
-double UCB1(Node *node);
+double UCB(Node *node, double UCB_C);
 
 /**
  * Shuffles the array given
@@ -48,17 +50,19 @@ int random_move(int num_legal);
  * Selects best scoring child based on function
  * Currently using ucb1
  * @param node node to search
+ * @param UCB_C constant, higher for exploration, lower for exploitation *
  * @return best child
  */
-Node *select_child(Node *node);
+Node *select_child(Node *node, double UCB_C);
 
 /**
  * Selects the best node in a tree based on function
  * Currently using ucb1 with greedy algorithm
  * @param root root of tree to search
+ * @param UCB_C constant, higher for exploration, lower for exploitation
  * @return the best node in the tree
  */
-Node *select_best_node(Node *root);
+Node *select_best_node(Node *root, double UCB_C);
 
 /**
  * Gets the mcts score from a terminal game state
@@ -94,17 +98,48 @@ Node *expand_node(Node *node);
 double simulate(Game game, int optimizer);
 
 /**
+ * Calculates the memory usage of one node
+ * Helper function for calculate_tree_memory_usage
+ * @param node node to check
+ * @return size of the node in bytes
+ */
+uint64_t calculate_node_memory_usage(const Node *node);
+
+/**
+ * Calculates the memory used by the whole tree
+ * @param root root of tree to check
+ * @return the size of the tree in bytes
+ */
+uint64_t calculate_tree_memory_usage(const Node *root);
+
+/**
  * Frees a tree recursively
  * Cleans up dangling references
  * @param root root of tree to free
+ * @return the size of the tree in bytes
  */
 void free_tree(Node *root);
 
 /**
+ * Prints the iteration, tree memory in kb, and the nodes in the tree
+ * @param root root of tree
+ * @param iteration the iteration mcts is on
+ */
+void print_debug_info(Node *root, int iteration);
+
+/**
  * Finds the best move according to mcts
  * @param root tree to search
+ * @param UCB_C constant, higher for exploration, lower for exploitation
  * @param optimizer player to find best move for
  * @param budget how many iterations can be taken
- * @return best move for optimizer
+ * @param debug whether to print debug info
+ * @return index of best move for optimizer
  */
-uint64_t monte_carlo_tree_search(Node *root, int optimizer, int budget);
+int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget, bool debug);
+
+/**
+ * Initializes a root ready for mcts
+ * @return initialized root
+ */
+Node *initialize_root();

@@ -5,11 +5,11 @@
 #include <time.h>
 
 bool is_leaf(Node *node) {
-    return (node->children == NULL) ? true : false;
+    return node->num_expanded >= node->num_legal;
 }
 
-double UCB1(Node *node) {
-    return (node->value / node->visits) + 1.5 * (sqrt(log(node->parent->visits) / node->visits));
+double UCB(Node *node, double UCB_C) {
+    return (node->value / node->visits) + UCB_C * (sqrt(log(node->parent->visits) / node->visits));
 }
 
 void shuffle_moves(uint64_t *legal_moves, int num_legal) {
@@ -26,29 +26,34 @@ int random_move(int num_legal) {
     return rand() % num_legal;
 }
 
-Node *select_child(Node *node) {
+Node *select_child(Node *node, double UCB_C) {
 
     Node *best_child = NULL;
-    double best_ucb1 = -INFINITY;
+    double best_ucb = -INFINITY;
     // iterate through the children and
     for (int i = 0; i < node->num_legal; i++) {
-        if (node->children[i] == NULL) {
-            // reached the end, break
+        Node *child = node->children[i];
+        if (child == NULL) {
+            // No more valid children, break
             break;
         }
-        Node *child = node->children[i];
-        double ucb1 = UCB1(child);
-        if (ucb1 > best_ucb1) {
-            best_ucb1 = ucb1;
+        double ucb = UCB(child, UCB_C);
+        if (ucb > best_ucb) {
+            best_ucb = ucb;
             best_child = child;
         }
     }
     return best_child;
 }
 
-Node *select_best_node(Node *root) {
-    while (!is_leaf(root)) {
-        root = select_child(root);
+Node *select_best_node(Node *root, double UCB_C) {
+
+    while (!root->end) {
+        if (!is_leaf(root)) {
+            return root;
+        } else {
+            root = select_child(root, UCB_C);
+        }
     }
     return root;
 }
@@ -83,10 +88,7 @@ Node *expand_node(Node *node) {
         return node;
     }
     // get the index of the child to expand to
-    int child_index = 0;
-    while (node->children[child_index] != NULL) {
-        child_index++;
-    }
+    int child_index = node->num_expanded;
 
     // assign the child it's parameters
     Node *child = (Node *)malloc(sizeof(Node));
@@ -101,6 +103,7 @@ Node *expand_node(Node *node) {
         // child is a terminal state: do not allocate any more memory
         child->end = true;
         node->children[child_index] = child;
+        node->num_expanded++;
         return child;
     } else if (state == 2) {
         // child state passes, change the player manually
@@ -114,6 +117,7 @@ Node *expand_node(Node *node) {
     uint64_t temp_legal_moves[MAX_LEGAL_MOVES];
     child->num_legal = generate_legal_moves(child->game, temp_legal_moves);
     child->legal_moves = (uint64_t *)malloc(child->num_legal * sizeof(uint64_t));
+    child->children = (Node **)malloc(child->num_legal * sizeof(Node *));
     for (int i = 0; i < child->num_legal; i++) {
         child->legal_moves[i] = temp_legal_moves[i];
     }
@@ -122,6 +126,7 @@ Node *expand_node(Node *node) {
 
     // assign the child to the node's children
     node->children[child_index] = child;
+    node->num_expanded++;
 
     // child has more moves to make
     return child;
@@ -143,6 +148,44 @@ double simulate(Game game, int optimizer) {
     return get_score_from_state(game, optimizer);
 }
 
+uint64_t count_nodes(const Node *root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    uint64_t count = 1; // Count the current node
+
+    for (int i = 0; i < root->num_legal; i++) {
+        count += count_nodes(root->children[i]);
+    }
+
+    return count;
+}
+
+uint64_t calculate_node_memory_usage(const Node *node) {
+    uint64_t size = sizeof(Node);
+
+    // Add memory used by legal_moves array if it exists
+    if (node->legal_moves != NULL) {
+        size += sizeof(uint64_t) * node->num_legal;
+    }
+
+    return size;
+}
+
+uint64_t calculate_tree_memory_usage(const Node *root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    uint64_t bytes = calculate_node_memory_usage(root);
+    for (int i = 0; i < root->num_legal; i++) {
+        bytes += calculate_tree_memory_usage(root->children[i]);
+    }
+
+    return bytes;
+}
+
 void free_tree(Node *root) {
     if (root == NULL) {
         // base case
@@ -157,6 +200,9 @@ void free_tree(Node *root) {
     // free the legal move array
     if (root->legal_moves != NULL) {
         free(root->legal_moves);
+    }
+    if (root->children != NULL) {
+        free(root->children);
     }
 
     // cut the dangling reference
@@ -176,27 +222,24 @@ void free_tree(Node *root) {
     free(root);
 }
 
-uint64_t monte_carlo_tree_search(Node *root, int optimizer, int budget) {
+void print_debug_info(Node *root, int iteration) {
+    printf("%i: Kb: %llu, Nodes: %llu\r", iteration, calculate_tree_memory_usage(root) / (1024), count_nodes(root));
+    fflush(stdout);
+}
 
-    uint64_t best_move;
+int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget, bool debug) {
 
-    // shuffle the root's moves
-    // necessary for expand_node to work
-    // copied from expand node
-    uint64_t temp_legal_moves[MAX_LEGAL_MOVES];
-    root->num_legal = generate_legal_moves(root->game, temp_legal_moves);
-    root->legal_moves = (uint64_t *)malloc(root->num_legal * sizeof(uint64_t));
-    for (int i = 0; i < root->num_legal; i++) {
-        root->legal_moves[i] = temp_legal_moves[i];
-    }
-    shuffle_moves(root->legal_moves, root->num_legal);
+    int best_move = 0;
 
     // mcts loop
     // one loop is one iteration of mcts
     for (int i = 0; i < budget; i++) {
+        if (debug && !(i % 100)) {
+            print_debug_info(root, i);
+        }
 
         // find the node to expand
-        Node *search_node = select_best_node(root);
+        Node *search_node = select_best_node(root, UCB_C);
 
         // expand the node
         search_node = expand_node(search_node);
@@ -204,10 +247,39 @@ uint64_t monte_carlo_tree_search(Node *root, int optimizer, int budget) {
         // simulate the result and backpropagate the result
         backpropogate(search_node, simulate(search_node->game, optimizer));
     }
+    if (debug) {
+        putchar('\n');
+    }
 
-    best_move = select_child(root);
+    uint64_t best_visits = 0;
+    for (int child = 0; child < root->num_legal; child++) {
+        if (root->children[child]->visits > best_visits) {
+            best_visits = root->children[child]->visits;
+            best_move = child;
+        }
+    }
     return best_move;
 }
 
-int main() {
+Node *initialize_root() {
+    Node *root;
+    root = (Node *)malloc(sizeof(Node));
+    root->end = false;
+    root->parent = NULL;
+    root->game = initialize_board();
+    root->visits = 0;
+    root->value = 0;
+
+    // shuffle the root's moves
+    // necessary for expand_node to work
+    // copied from expand node
+    uint64_t temp_legal_moves[MAX_LEGAL_MOVES];
+    root->num_legal = generate_legal_moves(root->game, temp_legal_moves);
+    root->legal_moves = (uint64_t *)malloc(root->num_legal * sizeof(uint64_t));
+    root->children = (Node **)malloc(root->num_legal * sizeof(Node *));
+    for (int i = 0; i < root->num_legal; i++) {
+        root->legal_moves[i] = temp_legal_moves[i];
+    }
+    shuffle_moves(root->legal_moves, root->num_legal);
+    return root;
 }

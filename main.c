@@ -2,8 +2,11 @@
 #include "solver.h"
 #include "utils.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 int main() {
+    /*
     Game game = initialize_board();
 
     // Main game loop
@@ -58,6 +61,21 @@ int main() {
             printf("Invalid move. Please try again.\n");
         }
     }
+    */
+
+    srand(time(NULL));
+
+    const double UCB_C = 1.8;
+    const int budget = 1000000;
+    Node *root = initialize_root();
+    clock_t start, end;
+    start = clock();
+    int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, true);
+    end = clock();
+    printf("Best move: %i\n", best_move);
+    printf("Time: %lf\n", (((double)(end - start)) / CLOCKS_PER_SEC));
+    free_tree(root);
+    return 0;
 
     return 0;
 }
