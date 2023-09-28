@@ -3,3 +3,4 @@ main
 solver
 /Database
 .DS_Store
+/solver.dSYM
