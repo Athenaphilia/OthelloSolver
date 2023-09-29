@@ -5,7 +5,26 @@
 #include <stdlib.h>
 #include <time.h>
 
-int main() {
+int main(int argc, char **argv) {
+
+    double UCB_C = 1.5;
+    int budget = 10000;
+    bool debug = false;
+
+    if (argc > 1) {
+        for (int arg = 1; arg < argc; arg++) {
+            if (test_flag(argv[arg], "-d")) {
+                debug = true;
+            } else if (test_flag(argv[arg], "-b")) {
+                budget = atoi(argv[arg + 1]);
+                arg++;
+            } else if (test_flag(argv[arg], "-u")) {
+                UCB_C = atof(argv[arg + 1]);
+                arg++;
+            }
+        }
+    }
+
     /*
     Game game = initialize_board();
 
@@ -65,15 +84,15 @@ int main() {
 
     srand(time(NULL));
 
-    const double UCB_C = 1.8;
-    const int budget = 1000000;
     Node *root = initialize_root();
     clock_t start, end;
     start = clock();
-    int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, true);
+    int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, debug);
     end = clock();
     printf("Best move: %i\n", best_move);
-    printf("Time: %lf\n", (((double)(end - start)) / CLOCKS_PER_SEC));
+    if (debug) {
+        printf("Time: %lf\n", (((double)(end - start)) / CLOCKS_PER_SEC));
+    }
     free_tree(root);
     return 0;
 

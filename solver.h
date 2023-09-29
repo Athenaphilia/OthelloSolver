@@ -1,3 +1,5 @@
+#ifndef SOLVER_H
+#define SOLVER_H
 #include "position.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -143,3 +145,4 @@ int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget,
  * @return initialized root
  */
 Node *initialize_root();
+#endif
