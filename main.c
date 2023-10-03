@@ -89,10 +89,10 @@ int main(int argc, char **argv) {
     start = clock();
     int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, debug);
     end = clock();
-    printf("Best move: %i\n", best_move);
     if (debug) {
         printf("Time: %lf\n", (((double)(end - start)) / CLOCKS_PER_SEC));
     }
+    printf("Best move: %i\n", best_move);
     free_tree(root);
     return 0;
 
