@@ -223,7 +223,7 @@ void free_tree(Node *root) {
 }
 
 void print_debug_info(Node *root, int iteration) {
-    printf("%i - Kb: %llu, Nodes: %llu\r", iteration, calculate_tree_memory_usage(root) / (1024), count_nodes(root));
+    printf("%d - Kb: %llu, Nodes: %llu\r", iteration, (unsigned long long)calculate_tree_memory_usage(root) / (1024), (unsigned long long)count_nodes(root));
     fflush(stdout);
 }
 
