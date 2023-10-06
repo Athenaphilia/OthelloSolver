@@ -30,54 +30,50 @@ int main(int argc, char **argv) {
     clock_t start, end;
     Game game = initialize_board();
 
-    // Main game loop
-    while (1) {
+    // main game loop
+    while (true) {
 
-        // find the legal moves
-        uint64_t legal_moves_array[34];
-        generate_legal_moves(game, legal_moves_array);
-        uint64_t legal_moves = generate_int_moves(legal_moves_array);
+        // get the legal moves for the position
+        uint64_t legal_move_array[MAX_LEGAL_MOVES];
+        generate_legal_moves(game, legal_move_array);
+        uint64_t legal_moves = generate_int_moves(legal_move_array);
 
-        // Display the current board
-        display_board(game, legal_moves);
-        // Check for game over or no legal moves
         int state = find_state(game);
         if (state == 1) {
-
             // game over
-            int black_count = count_pieces(game, 1);
-            int white_count = count_pieces(game, 2);
-
-            if (black_count > white_count) {
-                printf("Player B wins with %d-%d!\n", black_count, white_count);
-            } else if (white_count > black_count) {
-                printf("Player W wins with %d-%d!\n", white_count, black_count);
+            int count_b = count_pieces(game, 1);
+            int count_w = count_pieces(game, 2);
+            display_board(game, legal_moves);
+            if (count_b > count_w) {
+                printf("Player B wins with %i-%i\n", count_b, count_w);
+            } else if (count_b < count_w) {
+                printf("Player W wins with %i-%i\n", count_w, count_b);
             } else {
-                printf("It's a draw! %d-%d\n", black_count, white_count);
+                printf("It's a draw!");
             }
             break;
         } else if (state == 2) {
-            // pass
-            printf("Player %c passes\n", (game.player == 1) ? 'B' : 'W');
-            game.player = (game.player == 1) ? 2 : 1;
+            // set the player correctly
+            game.player = 3 - game.player;
             continue;
         }
+
+        display_board(game, legal_moves);
 
         Node *root = initialize_root(game);
         start = clock();
         int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, debug);
         end = clock();
-        uint64_t chosen_move = root->legal_moves[best_move];
+        uint64_t move = legal_move_array[best_move];
         free_tree(root);
+
         if (debug) {
-            printf("Time: %lf\n", (((double)(end - start)) / CLOCKS_PER_SEC));
+            printf("Time: %lu\n", (CLOCKS_PER_SEC) * (end - start));
         }
-        // Check if the chosen move is legal
-        if (legal_moves & chosen_move) {
-            // Make the move and update the board
-            game = make_move(game, chosen_move);
+        if (move & legal_moves) {
+            game = make_move(game, move);
         } else {
-            printf("Invalid move. Please try again.\n");
+            printf("Invalid move\n");
         }
     }
 

@@ -98,7 +98,7 @@ Node *expand_node(Node *node) {
     child->value = 0;
     int state = find_state(child->game);
 
-    // check the state to make sure we are not exploring
+    // check the state to make sure we are not exploring terminal states
     if (state == 1) {
         // child is a terminal state: do not allocate any more memory
         child->end = true;
@@ -234,7 +234,7 @@ int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget,
     // mcts loop
     // one loop is one iteration of mcts
     for (int i = 0; i < budget; i++) {
-        if (debug && !(i % 100)) {
+        if (debug && !(i % 1000)) {
             print_debug_info(root, i);
         }
 
