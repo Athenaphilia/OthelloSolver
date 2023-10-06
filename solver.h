@@ -144,5 +144,5 @@ int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget,
  * Initializes a root ready for mcts
  * @return initialized root
  */
-Node *initialize_root();
+Node *initialize_root(Game game);
 #endif

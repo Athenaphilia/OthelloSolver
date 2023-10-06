@@ -261,12 +261,12 @@ int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget,
     return best_move;
 }
 
-Node *initialize_root() {
+Node *initialize_root(Game game) {
     Node *root;
     root = (Node *)malloc(sizeof(Node));
     root->end = false;
     root->parent = NULL;
-    root->game = initialize_board();
+    root->game = game;
     root->visits = 0;
     root->value = 0;
 
