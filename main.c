@@ -7,6 +7,8 @@
 
 int main(int argc, char **argv) {
 
+    srand(time(NULL));
+
     double UCB_C = 1.5;
     int budget = 10000;
     bool debug = false;
@@ -81,8 +83,6 @@ int main(int argc, char **argv) {
         }
     }
     */
-
-    srand(time(NULL));
 
     Node *root = initialize_root();
     clock_t start, end;
