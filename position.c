@@ -189,7 +189,7 @@ int find_state(Game game) {
 }
 
 void display_board(Game game, uint64_t legal_moves) {
-    printf("  1 2 3 4 5 6 7 8\n");
+    printf("  a b c d e f g h\n");
     for (int y = 0; y < BOARD_SIZE; y++) {
         printf("%d ", y + 1);
         for (int x = 0; x < BOARD_SIZE; x++) {

@@ -35,7 +35,8 @@ Game parse_game(char *string) {
 
         // check if move is legal
         uint64_t legal_moves_array[MAX_LEGAL_MOVES]; // this is solely for generate_int_moves, maybe refactor?
-        uint64_t legal_moves = generate_int_moves(generate_legal_moves(game, legal_moves_array));
+        generate_legal_moves(game, legal_moves_array);
+        uint64_t legal_moves = generate_int_moves(legal_moves_array);
 
         // invalid move, error
         if (!(legal_moves | move)) {

@@ -99,7 +99,7 @@ Node *expand_node(Node *node) {
     child->value = 0;
     int state = find_state(child->game);
 
-    // check the state to make sure we are not exploring
+    // check the state to make sure we are not exploring terminal states
     if (state == 1) {
         // child is a terminal state: do not allocate any more memory
         child->end = true;
@@ -224,7 +224,7 @@ void free_tree(Node *root) {
 }
 
 void print_debug_info(Node *root, int iteration) {
-    printf("%i - Kb: %llu, Nodes: %llu\r", iteration, calculate_tree_memory_usage(root) / (1024), count_nodes(root));
+    printf("%d - Kb: %llu, Nodes: %llu\r", iteration, (unsigned long long)calculate_tree_memory_usage(root) / (1024), (unsigned long long)count_nodes(root));
     fflush(stdout);
 }
 
@@ -262,12 +262,12 @@ int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget,
     return best_move;
 }
 
-Node *initialize_root() {
+Node *initialize_root(Game game) {
     Node *root;
     root = (Node *)malloc(sizeof(Node));
     root->end = false;
     root->parent = NULL;
-    root->game = initialize_board();
+    root->game = game;
     root->visits = 0;
     root->value = 0;
 
