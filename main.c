@@ -14,6 +14,8 @@ int main(int argc, char **argv) {
     bool debug = false;
     char player1 = 'h';
     char player2 = 'h';
+    bool lerping = false;
+    double v0, v1;
 
     if (argc > 1) {
         for (int arg = 1; arg < argc; arg++) {
@@ -28,12 +30,17 @@ int main(int argc, char **argv) {
             } else if (test_flag(argv[arg], "-p")) {
                 player1 = argv[arg + 1][0];
                 player2 = argv[arg + 1][1];
+            } else if (test_flag(argv[arg], "-l")) {
+                lerping = true;
+                v0 = atof(argv[arg + 1]);
+                v1 = atof(argv[arg + 2]);
             }
         }
     }
 
     clock_t start, end;
     Game game = initialize_board();
+    int turns_passed = 0;
     char current_player = player1;
 
     // main game loop
@@ -68,6 +75,9 @@ int main(int argc, char **argv) {
 
         uint64_t move;
         if (current_player == 'm') {
+            if (lerping) {
+                UCB_C = lerp(v0, v1, (double)turns_passed / NUM_SQUARES);
+            }
             Node *root = initialize_root(game);
             start = clock();
             int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, debug);
@@ -93,6 +103,9 @@ int main(int argc, char **argv) {
             game = make_move(game, move);
             // switch players
             current_player = (current_player == player1) ? player2 : player1;
+            if (turns_passed < NUM_SQUARES) {
+                turns_passed++;
+            }
         } else {
             printf("Invalid move\n");
         }

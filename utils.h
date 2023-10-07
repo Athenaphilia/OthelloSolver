@@ -17,4 +17,13 @@ void print_bits(uint64_t n);
  */
 bool test_flag(char *string, char flag[2]);
 
+/**
+ * Linear Interpolation, taken from https://en.wikipedia.org/wiki/Linear_interpolation
+ * @param v0 start
+ * @param v1 end
+ * @param t alpha value, should be between 0 and 1
+ * @return lerp
+ */
+double lerp(double v0, double v1, double t);
+
 #endif
