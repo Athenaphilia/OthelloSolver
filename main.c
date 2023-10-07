@@ -12,6 +12,8 @@ int main(int argc, char **argv) {
     double UCB_C = 1.5;
     int budget = 10000;
     bool debug = false;
+    char player1 = 'h';
+    char player2 = 'h';
 
     if (argc > 1) {
         for (int arg = 1; arg < argc; arg++) {
@@ -23,12 +25,16 @@ int main(int argc, char **argv) {
             } else if (test_flag(argv[arg], "-u")) {
                 UCB_C = atof(argv[arg + 1]);
                 arg++;
+            } else if (test_flag(argv[arg], "-p")) {
+                player1 = argv[arg + 1][0];
+                player2 = argv[arg + 1][1];
             }
         }
     }
 
     clock_t start, end;
     Game game = initialize_board();
+    char current_player = player1;
 
     // main game loop
     while (true) {
@@ -60,18 +66,33 @@ int main(int argc, char **argv) {
 
         display_board(game, legal_moves);
 
-        Node *root = initialize_root(game);
-        start = clock();
-        int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, debug);
-        end = clock();
-        uint64_t move = legal_move_array[best_move];
-        free_tree(root);
+        uint64_t move;
+        if (current_player == 'm') {
+            Node *root = initialize_root(game);
+            start = clock();
+            int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, debug);
+            end = clock();
+            move = legal_move_array[best_move];
+            free_tree(root);
+            if (debug) {
+                printf("Time: %lf\n", (double)(end - start) / CLOCKS_PER_SEC);
+            }
+        } else {
+            printf("Player %c's turn (Enter your move in the format 'xy', e.g., 'c3'): ", (game.player == 1) ? 'B' : 'W');
+            char move_input[3];
+            scanf("%s", move_input);
 
-        if (debug) {
-            printf("Time: %lu\n", (CLOCKS_PER_SEC) * (end - start));
+            // Convert the input to board coordinates (e.g., 'c3' to index 34)
+            int x = move_input[0] - 'a';
+            int y = move_input[1] - '1';
+            int move_index = x + y * BOARD_SIZE;
+            move = 1ULL << move_index;
         }
+
         if (move & legal_moves) {
             game = make_move(game, move);
+            // switch players
+            current_player = (current_player == player1) ? player2 : player1;
         } else {
             printf("Invalid move\n");
         }
