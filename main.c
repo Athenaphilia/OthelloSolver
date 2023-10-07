@@ -9,14 +9,15 @@ int main(int argc, char **argv) {
 
     srand(time(NULL));
 
-    double UCB_C = 1.5;
-    int budget = 10000;
-    bool debug = false;
-    char player1 = 'h';
-    char player2 = 'h';
-    bool lerping = false;
-    double v0, v1;
+    double UCB_C = 1.5;    // upper confidence bound constant
+    int budget = 10000;    // budget for monte-carlo tree search
+    bool debug = false;    // true for showing debug info like time and node count
+    char player1 = 'h';    // first player is human or machine
+    char player2 = 'h';    // second player is human or machine
+    bool lerping = false;  // whether to linear interpolate ucb constants over the game
+    double v0 = 2, v1 = 1; // if we are lerping, what two values should be used
 
+    // check for flags
     if (argc > 1) {
         for (int arg = 1; arg < argc; arg++) {
             if (test_flag(argv[arg], "-d")) {
@@ -38,10 +39,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    clock_t start, end;
-    Game game = initialize_board();
-    int turns_passed = 0;
-    char current_player = player1;
+    // set up variables we are going to use
+    clock_t start, end;             // used for timing
+    Game game = initialize_board(); // get starting position
+    int turns_passed = 0;           // number of turns passed
+    char current_player = player1;  // whether the current player is machine or human
 
     // main game loop
     while (true) {
@@ -51,21 +53,27 @@ int main(int argc, char **argv) {
         generate_legal_moves(game, legal_move_array);
         uint64_t legal_moves = generate_int_moves(legal_move_array);
 
+        // find if state is game over or pass
         int state = find_state(game);
         if (state == 1) {
             // game over
+            // count the pieces for each player
             int count_b = count_pieces(game, 1);
             int count_w = count_pieces(game, 2);
             display_board(game, legal_moves);
             if (count_b > count_w) {
+                // black wins
                 printf("Player B wins with %i-%i\n", count_b, count_w);
             } else if (count_b < count_w) {
+                // white wins
                 printf("Player W wins with %i-%i\n", count_w, count_b);
             } else {
+                // draw
                 printf("It's a draw!");
             }
             break;
         } else if (state == 2) {
+            // current player passes
             // set the player correctly
             game.player = 3 - game.player;
             continue;
@@ -73,21 +81,35 @@ int main(int argc, char **argv) {
 
         display_board(game, legal_moves);
 
+        // choose who to get the move from
         uint64_t move;
         if (current_player == 'm') {
+            // machine move
+
             if (lerping) {
+                // lerp if we are lerping
                 UCB_C = lerp(v0, v1, (double)turns_passed / NUM_SQUARES);
             }
+            // initialize the root to the game state
             Node *root = initialize_root(game);
+
+            // start the mcts
             start = clock();
             int best_move = monte_carlo_tree_search(root, UCB_C, root->game.player, budget, debug);
             end = clock();
+
+            // get the best move
             move = legal_move_array[best_move];
+            // free the tree
             free_tree(root);
             if (debug) {
+                // if debugging, print the time
                 printf("Time: %lf\n", (double)(end - start) / CLOCKS_PER_SEC);
             }
         } else {
+            // human move
+
+            // get the move from stdin
             printf("Player %c's turn (Enter your move in the format 'xy', e.g., 'c3'): ", (game.player == 1) ? 'B' : 'W');
             char move_input[3];
             scanf("%s", move_input);
@@ -99,7 +121,6 @@ int main(int argc, char **argv) {
             move = 1ULL << move_index;
         }
 
-
         if (move & legal_moves) {
             game = make_move(game, move);
             // switch players
@@ -110,7 +131,6 @@ int main(int argc, char **argv) {
         } else {
             printf("Invalid move\n");
         }
-
     }
 
     return 0;
