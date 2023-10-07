@@ -99,6 +99,7 @@ int main(int argc, char **argv) {
             move = 1ULL << move_index;
         }
 
+
         if (move & legal_moves) {
             game = make_move(game, move);
             // switch players
@@ -109,6 +110,7 @@ int main(int argc, char **argv) {
         } else {
             printf("Invalid move\n");
         }
+
     }
 
     return 0;

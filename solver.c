@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#define DEBUG_INTERVAL 1000
 
 bool is_leaf(Node *node) {
     return node->num_expanded >= node->num_legal;
@@ -234,7 +235,7 @@ int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget,
     // mcts loop
     // one loop is one iteration of mcts
     for (int i = 0; i < budget; i++) {
-        if (debug && !(i % 1000)) {
+        if (debug && !(i % DEBUG_INTERVAL)) {
             print_debug_info(root, i);
         }
 
