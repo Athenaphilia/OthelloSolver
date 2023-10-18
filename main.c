@@ -24,10 +24,8 @@ int main(int argc, char **argv) {
                 debug = true;
             } else if (test_flag(argv[arg], "-b")) {
                 budget = atoi(argv[arg + 1]);
-                arg++;
             } else if (test_flag(argv[arg], "-u")) {
                 UCB_C = atof(argv[arg + 1]);
-                arg++;
             } else if (test_flag(argv[arg], "-p")) {
                 player1 = argv[arg + 1][0];
                 player2 = argv[arg + 1][1];
