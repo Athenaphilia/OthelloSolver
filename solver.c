@@ -249,6 +249,7 @@ int monte_carlo_tree_search(Node *root, double UCB_C, int optimizer, int budget,
         backpropogate(search_node, simulate(search_node->game, optimizer));
     }
     if (debug) {
+        print_debug_info(root, budget - 1);
         putchar('\n');
     }
 
