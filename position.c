@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define NOT_LEFT_COLUMN 0xFEFEFEFEFEFEFEFEULL
+#define NOT_RIGHT_COLUMN 0x7F7F7F7F7F7F7F7FULL
 
 Game initialize_board() {
     Game game;
@@ -114,8 +116,8 @@ uint64_t calculate_flips_direction(uint64_t player_pieces, uint64_t opponent_pie
     for (int i = 0; i < BOARD_SIZE; i++) {
         current_square = (dy > 0) ? current_square << BOARD_SIZE : current_square;
         current_square = (dy < 0) ? current_square >> BOARD_SIZE : current_square;
-        current_square = (dx > 0) ? current_square << 1 : current_square;
-        current_square = (dx < 0) ? current_square >> 1 : current_square;
+        current_square = (dx > 0) ? (current_square << 1 & NOT_LEFT_COLUMN) : current_square;
+        current_square = (dx < 0) ? (current_square >> 1 & NOT_RIGHT_COLUMN) : current_square;
 
         // Check if the current square is out of bounds or empty
         if (!(current_square & (player_pieces | opponent_pieces))) {
@@ -179,6 +181,7 @@ int find_state(Game game) {
     generate_legal_moves(game, legal_moves_player);
     if (generate_int_moves(legal_moves_player) == 0ULL) {
         uint64_t legal_moves_opponent[MAX_LEGAL_MOVES];
+        game.player = 3 - game.player;
         generate_legal_moves(game, legal_moves_opponent);
         if (generate_int_moves(legal_moves_opponent) == 0ULL) {
             return 1; // double pass, game over
