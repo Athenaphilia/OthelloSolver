@@ -24,33 +24,30 @@ uint64_t check_direction(Game game, int square, int dx, int dy) {
     // Move along the current direction
     x += dx;
     y += dy;
-    int index = x + y * BOARD_SIZE;
 
     if (x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE) {
-        uint64_t square_mask = 1ULL << index;
+        while (x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE) {
+            int index = x + y * BOARD_SIZE;
+            uint64_t square_mask = 1ULL << index;
 
-        if (opponent_pieces & square_mask) {
-            flips |= square_mask;
-            x += dx;
-            y += dy;
-            index = x + y * BOARD_SIZE;
-
-            // Continue checking for flips
-            while (x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE) {
-                square_mask = 1ULL << index;
-
-                if (player_pieces & square_mask) {
-                    return flips;
-                } else if (opponent_pieces & square_mask) {
-                    flips |= square_mask;
-                } else {
-                    break;
+            if (opponent_pieces & square_mask) {
+                if ((x > 0) && (x < (BOARD_SIZE - 1))) {
+                    square_mask = (dx > 0) ? square_mask << 1 : square_mask >> 1;
+                    if (opponent_pieces & square_mask) {
+                        // Prevent "looping around" in the current column
+                        break;
+                    }
                 }
 
-                x += dx;
-                y += dy;
-                index = x + y * BOARD_SIZE;
+                flips |= square_mask;
+            } else if (player_pieces & square_mask) {
+                return flips;
+            } else {
+                break;
             }
+
+            x += dx;
+            y += dy;
         }
     }
 
@@ -82,7 +79,7 @@ int generate_legal_moves(Game game, uint64_t *legal_moves) {
                         continue;
                     }
 
-                    uint64_t flips = check_direction(game, i, dx, dy);
+                    uint64_t flips = calculate_flips_direction(player_pieces, opponent_pieces, square_mask, dy, dx);
 
                     if (flips) {
                         if (num_moves < MAX_LEGAL_MOVES) {
