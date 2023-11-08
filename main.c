@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
             // current player passes
             // set the player correctly
             game.player = 3 - game.player;
+            current_player = (current_player == player1) ? player2 : player1;
             continue;
         }
 
