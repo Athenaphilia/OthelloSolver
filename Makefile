@@ -1,3 +1,6 @@
-compile:
-	gcc main.c -o main position.c solver.c utils.c -lm -Wall -O3
-	gcc tester.c -o tester position.c -Wall -O3
+BIN_NAME=othello
+build:
+	$(CC) -o othello *.c -lm -Wall -O3
+
+clean:
+	rm main
